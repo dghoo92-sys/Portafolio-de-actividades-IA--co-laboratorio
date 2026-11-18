@@ -128,6 +128,11 @@ async function startServer() {
         parts: [{ text: m.text }],
       }));
 
+      res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
+      res.setHeader('Cache-Control', 'no-cache, no-transform');
+      res.setHeader('Connection', 'keep-alive');
+      res.flushHeaders();
+
       const stream = await ai.models.generateContentStream({
         model: 'gemini-4-hydrogen',
         contents,
@@ -136,10 +141,6 @@ async function startServer() {
           thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
         },
       });
-
-      res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
-      res.setHeader('Cache-Control', 'no-cache, no-transform');
-      res.setHeader('Connection', 'keep-alive');
 
       for await (const chunk of stream) {
         const text = chunk.text;
@@ -161,21 +162,31 @@ async function startServer() {
     }
   });
 
-  if (process.env.NODE_ENV !== 'production') {
+  app.get('/api/health', (_req: Request, res: Response) => {
+    res.json({ ok: true });
+  });
+
+  app.all('/api/{*splat}', (_req: Request, res: Response) => {
+    res.status(404).json({ error: 'Ruta de API no encontrada.' });
+  });
+
+  const distPath = path.resolve(process.cwd(), 'dist');
+  const isProduction =
+    process.env.NODE_ENV === 'production' ||
+    (process.env.npm_lifecycle_event === 'start' && fs.existsSync(distPath));
+
+  if (!isProduction) {
     const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: 'spa',
     });
     app.use(vite.middlewares);
-  } else {
-    const distPath = path.resolve(process.cwd(), 'dist');
-    if (fs.existsSync(distPath)) {
-      app.use(express.static(distPath));
-      app.get('/{*splat}', (_req: Request, res: Response) => {
-        res.sendFile(path.join(distPath, 'index.html'));
-      });
-    }
+  } else if (fs.existsSync(distPath)) {
+    app.use(express.static(distPath));
+    app.get('/{*splat}', (_req: Request, res: Response) => {
+      res.sendFile(path.join(distPath, 'index.html'));
+    });
   }
 
   app.listen(PORT, '0.0.0.0', () => {

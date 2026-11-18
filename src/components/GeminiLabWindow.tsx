@@ -125,7 +125,15 @@ export function GeminiLabWindow({
 
       if (!response.ok) {
         const errData = (await response.json().catch(() => null)) as { error?: string } | null;
-        throw new Error(errData?.error || `Error del servidor (${response.status})`);
+        if (errData?.error) {
+          throw new Error(errData.error);
+        }
+        if (response.status === 404) {
+          throw new Error(
+            'El servicio de Gemini (/api/gemini/lab) no respondió en este entorno (404). Recarga la vista previa o reinicia el servidor.'
+          );
+        }
+        throw new Error(`Error del servidor (${response.status})`);
       }
 
       const contentType = response.headers.get('content-type') ?? '';
