@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Muro QR: Mapas mentales y Retos de IA</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{--bg:#f4f1ea;--card:#fff;--ink:#1f2330;--mut:#6a6f80;--ac:#5b4bdb;--ln:#e2ddd0;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#171922;--card:#232634;--ink:#eceef6;--mut:#9aa0b5;--ac:#8d80ff;--ln:#333850}}
+:root[data-theme="dark"]{--bg:#171922;--card:#232634;--ink:#eceef6;--mut:#9aa0b5;--ac:#8d80ff;--ln:#333850}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.45}
+.w{max-width:960px;margin:0 auto;padding:16px}
+h1{font-size:1.5rem;margin:.2em 0}
+.tabs{display:flex;gap:8px;margin:12px 0}
+.tabs button{flex:1;padding:10px;border:1px solid var(--ln);background:var(--card);color:var(--ink);border-radius:10px;font-size:1rem;cursor:pointer}
+.tabs button.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+.card{background:var(--card);border:1px solid var(--ln);border-radius:12px;padding:14px}
+.top{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.top .t{flex:1;min-width:200px}
+#qr{padding:8px;background:#fff;border-radius:8px;line-height:0}
+input,textarea,select{width:100%;padding:9px;margin:4px 0;border:1px solid var(--ln);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
+button.go{background:var(--ac);color:#fff;border:0;padding:10px 16px;border-radius:8px;font-size:1rem;cursor:pointer;margin-top:6px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin-top:14px}
+.post b{display:block}.post small{color:var(--mut)}
+.post a{color:var(--ac);word-break:break-all}
+.lvl{display:inline-block;font-size:.8rem;padding:2px 8px;border-radius:99px;border:1px solid var(--ln);margin-bottom:6px}
+.ret{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+.ret .card{padding:10px 14px}
+.mut{color:var(--mut);font-size:.9rem}
+.heart{background:none;border:1px solid var(--ln);border-radius:99px;padding:2px 10px;color:var(--ink);cursor:pointer}
+</style>
+</head>
+<body>
+<div class="w">
+<h1>🧠🤖 Muro QR de la clase</h1>
+<div class="tabs">
+<button id="t-mapas">🧠 Mapas mentales</button>
+<button id="t-retos">🤖 Retos de IA</button>
+</div>
+
+<section id="v-mapas">
+<div class="card top">
+<div class="t"><b>Escanea y publica tu mapa mental</b><div class="mut">Pega el enlace de tu mapa (Drive, Canva, imagen en línea…) y cuéntanos tu idea central.</div></div>
+<div id="qr1"></div>
+</div>
+<div class="card">
+<input id="m-nom" placeholder="Tu nombre">
+<input id="m-tit" placeholder="Título del mapa mental">
+<input id="m-url" placeholder="Enlace al mapa (https://…)">
+<textarea id="m-txt" rows="3" placeholder="Idea central y lo que más aprendiste"></textarea>
+<button class="go" id="m-go">Publicar</button>
+</div>
+<div class="grid" id="l-mapas"></div>
+</section>
+
+<section id="v-retos" hidden>
+<div class="card top">
+<div class="t"><b>Escanea, elige un reto y comparte tu resultado</b><div class="mut">Indica la herramienta de IA, tu prompt y una reflexión de una línea. Reacciona a 2 publicaciones.</div></div>
+<div id="qr2"></div>
+</div>
+<div class="ret" id="retos"></div>
+<div class="card">
+<select id="r-sel"></select>
+<input id="r-nom" placeholder="Tu nombre">
+<input id="r-her" placeholder="Herramienta de IA usada">
+<textarea id="r-pro" rows="2" placeholder="Tu prompt"></textarea>
+<textarea id="r-res" rows="3" placeholder="Resultado y reflexión: ¿qué te sorprendió?"></textarea>
+<button class="go" id="r-go">Publicar</button>
+</div>
+<div class="grid" id="l-retos"></div>
+</section>
+<p class="mut" id="msg"></p>
+</div>
+
+<script>
+const RETOS=[
+["🟢 Nivel 1: Explorador","Pídele a una IA que resuma tu mapa mental en 5 líneas."],
+["🟢 Nivel 1: Explorador","Pídele 3 preguntas de repaso sobre tu tema."],
+["🟡 Nivel 2: Creador","Convierte tu mapa en un cuestionario de 5 preguntas con retroalimentación."],
+["🟡 Nivel 2: Creador","Pide una analogía que explique tu tema a un niño de 10 años."],
+["🔴 Nivel 3: Crítico","Pide datos sobre tu tema y verifícalos con 2 fuentes."],
+["🔴 Nivel 3: Crítico","Mejora un prompt vago agregando rol, contexto y formato."],
+["🏆 Reto final","Crea un código QR que lleve a tu mejor resultado y compártelo."]
+];
+const $=id=>document.getElementById(id);
+const esc=s=>String(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const base=location.href.split("#")[0];
+function qr(el,u){try{new QRCode($(el),{text:u,width:128,height:128})}catch(e){$(el).textContent="QR no disponible"}}
+qr("qr1",base+"#mapas");qr("qr2",base+"#retos");
+$("retos").innerHTML=RETOS.map(r=>`<div class="card"><span class="lvl">${r[0]}</span><div>${esc(r[1])}</div></div>`).join("");
+$("r-sel").innerHTML=RETOS.map((r,i)=>`<option value="${i}">${esc(r[0]+" — "+r[1])}</option>`).join("");
+function show(v){
+ for(const k of["mapas","retos"]){$("v-"+k).hidden=k!==v;$("t-"+k).classList.toggle("on",k===v)}
+ try{history.replaceState(null,"","#"+v)}catch(e){}
+}
+$("t-mapas").onclick=()=>show("mapas");$("t-retos").onclick=()=>show("retos");
+function view(){show(location.hash==="#retos"?"retos":"mapas")}
+window.addEventListener("hashchange",view);view();
+
+let db=null,items={mapas:[],retos:[]};
+function render(k){
+ const box=$("l-"+k);
+ const arr=items[k].slice().sort((a,b)=>(b.t||0)-(a.t||0));
+ box.innerHTML=arr.length?arr.map(p=>{
+  const body=k==="mapas"
+   ?`<b>${esc(p.tit)}</b><small>por ${esc(p.nom)}</small><p>${esc(p.txt)}</p>${/^https?:\/\//.test(p.url)?`<a href="${esc(p.url)}" target="_blank" rel="noopener">Ver mapa mental</a>`:""}`
+   :`<span class="lvl">${esc(RETOS[p.reto]?RETOS[p.reto][0]:"")}</span><small>por ${esc(p.nom)} · ${esc(p.her)}</small><p><i>${esc(p.pro)}</i></p><p>${esc(p.res)}</p>`;
+  return `<div class="card post">${body}<button class="heart" data-k="${k}" data-id="${p.id}">❤️ ${p.likes||0}</button></div>`
+ }).join(""):`<div class="mut">Aún no hay publicaciones. ¡Sé la primera persona!</div>`;
+}
+document.addEventListener("click",async e=>{
+ const b=e.target.closest(".heart");if(!b)return;
+ const p=items[b.dataset.k].find(x=>x.id===b.dataset.id);
+ if(!p||!db)return;
+ try{await db.collection(b.dataset.k).doc(p.id).update({likes:(p.likes||0)+1})}catch(x){$("msg").textContent="No se pudo reaccionar."}
+});
+async function pub(k,data,clear){
+ if(!db){$("msg").textContent="Para publicar abre el enlace con tu sesión de claude.ai.";return}
+ try{await db.collection(k).add({...data,likes:0,t:Date.now()});clear.forEach(i=>$(i).value="");$("msg").textContent="¡Publicado! ✅"}
+ catch(x){$("msg").textContent="No se pudo publicar (permisos). Pide acceso de colaborador al dueño."}
+}
+$("m-go").onclick=()=>{
+ if(!$("m-tit").value.trim())return;
+ pub("mapas",{nom:$("m-nom").value||"Anónimo",tit:$("m-tit").value,url:$("m-url").value,txt:$("m-txt").value},["m-tit","m-url","m-txt"]);
+};
+$("r-go").onclick=()=>{
+ if(!$("r-res").value.trim())return;
+ pub("retos",{reto:+$("r-sel").value,nom:$("r-nom").value||"Anónimo",her:$("r-her").value,pro:$("r-pro").value,res:$("r-res").value},["r-her","r-pro","r-res"]);
+};
+render("mapas");render("retos");
+(async()=>{
+ try{
+  db=await claude.use("db");
+  if(!db){$("msg").textContent="Modo vista previa: inicia sesión para publicar y ver el muro compartido.";return}
+  for(const k of["mapas","retos"]){
+   db.collection(k).onSnapshot(s=>{items[k]=s.docs.map(d=>({id:d.id,...d.data()}));render(k)},()=>{$("msg").textContent="No se pudo cargar el muro."});
+  }
+ }catch(e){$("msg").textContent="Muro compartido no disponible."}
+})();
+</script>
+</body>
+</html>

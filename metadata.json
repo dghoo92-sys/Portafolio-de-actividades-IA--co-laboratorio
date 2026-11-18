@@ -1,0 +1,8 @@
+{
+  "name": "Remix Remix Portafolio personal ",
+  "description": "Plataforma editorial de diagnóstico, co-creación pedagógica y uso ético de agentes de inteligencia artificial en el aula.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
