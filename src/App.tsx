@@ -38,7 +38,6 @@ import {
 import { MuroQrActivity } from './components/MuroQrActivity';
 import { EthicsMiniGameWindow } from './components/EthicsMiniGameWindow';
 import { FloatingVirtualAssistant } from './components/FloatingVirtualAssistant';
-import { GeminiLabWindow } from './components/GeminiLabWindow';
 import {
   ACTIVITY_2_STEPS,
   CLASSROOM_AI_TOOLS,
@@ -97,7 +96,6 @@ export default function App() {
   });
   const [workshopOpen, setWorkshopOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
-  const [geminiLabOpen, setGeminiLabOpen] = useState(false);
   const [assistantSpeaking, setAssistantSpeaking] = useState(true);
   const [contactPrefill, setContactPrefill] = useState('');
 
@@ -219,8 +217,6 @@ export default function App() {
           setContactOpen(true);
         }}
         onOpenProjectDoc={() => setSelectedDocument(PROJECT_DOCUMENT)}
-        geminiLabOpen={geminiLabOpen}
-        onToggleGeminiLab={() => setGeminiLabOpen((prev) => !prev)}
       />
 
       <main>
@@ -2974,7 +2970,6 @@ export default function App() {
       />
 
       <FloatingVirtualAssistant />
-      <GeminiLabWindow isOpen={geminiLabOpen} onClose={() => setGeminiLabOpen(false)} />
     </div>
   );
 }
