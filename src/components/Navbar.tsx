@@ -76,20 +76,23 @@ export function Navbar({
           <span>Nuestro proyecto</span>
         </button>
 
-        {/* Zone 3: Enlace directo a Gemini + instrucción para @laboratorio-de-colaboración-en-ia + Agente virtual + Mobile Drawer Toggle */}
+        {/* Zone 3: Botón @laboratorio-de-colaboración-en-ia con cuadrito de instrucciones y botón a Gemini + Agente virtual + Mobile Drawer Toggle */}
         <div className="relative flex items-center gap-2.5 lg:gap-3 shrink-0">
           <a
-            href="https://gemini.google.com/app"
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => {
-              copySkillHandle();
-              setShowGeminiInstruction(true);
+            href="#habilidad-gemini"
+            role="button"
+            onClick={(e) => {
+              e.preventDefault();
+              setShowGeminiInstruction((prev) => {
+                const next = !prev;
+                if (next) copySkillHandle();
+                return next;
+              });
             }}
-            title="Ir a Google Gemini e ingresar a @laboratorio-de-colaboración-en-ia"
-            aria-label="Ir a Google Gemini e ingresar a @laboratorio-de-colaboración-en-ia"
+            title="Ver instrucciones para copiar @laboratorio-de-colaboración-en-ia e ir a Gemini"
+            aria-label="Abrir instrucciones para usar @laboratorio-de-colaboración-en-ia en Gemini"
             aria-expanded={showGeminiInstruction}
-            className="inline-flex items-center gap-1.5 rounded-full bg-[#FFF0DE] hover:bg-[#F7C99D]/55 text-[#3E3028] border border-[#F7C99D] font-semibold text-xs px-3 sm:px-3.5 py-1.5 transition-all duration-200 hover:-translate-y-0.5 shadow-xs whitespace-nowrap shrink-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F57923]"
+            className="inline-flex items-center gap-1.5 rounded-full bg-[#FFF0DE] hover:bg-[#F7C99D]/55 text-[#3E3028] border border-[#F7C99D] font-semibold text-xs px-3 sm:px-3.5 py-1.5 transition-all duration-200 hover:-translate-y-0.5 shadow-xs whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F57923]"
           >
             <Sparkles className="w-3.5 h-3.5 shrink-0 text-[#F57923]" />
             <span className="hidden sm:inline max-w-[160px] lg:max-w-[230px] xl:max-w-none truncate">
@@ -101,52 +104,52 @@ export function Navbar({
 
           {showGeminiInstruction && (
             <div
-              role="region"
-              aria-label="Instrucción para ingresar a la habilidad en Gemini"
+              role="dialog"
+              aria-label="Instrucciones para usar la habilidad en Gemini"
               className="absolute right-0 top-full mt-2.5 w-80 sm:w-96 rounded-2xl bg-[#FAF7F0] border border-[#F7C99D] shadow-xl shadow-[#3E3028]/15 p-4 text-left z-50"
             >
-              <div className="flex items-start justify-between gap-2 mb-2">
+              <div className="flex items-start justify-between gap-2 mb-2.5">
                 <div className="flex items-center gap-2">
                   <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-[#FFF0DE] text-[#F57923]">
                     <Sparkles className="w-3.5 h-3.5" />
                   </span>
                   <p className="font-serif font-bold text-sm text-[#3E3028]">
-                    Cómo ingresar en Gemini
+                    Interactuar en Gemini
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setShowGeminiInstruction(false)}
-                  aria-label="Cerrar instrucción"
+                  aria-label="Cerrar instrucciones"
                   className="p-1 rounded-full text-[#6C584C] hover:text-[#3E3028] hover:bg-[#FFF0DE] transition-colors cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
 
-              <ol className="text-xs text-[#6C584C] space-y-1.5 list-decimal list-inside leading-relaxed">
+              <ol className="text-xs text-[#6C584C] space-y-2 list-decimal list-inside leading-relaxed">
                 <li>
-                  En la pestaña de <strong className="text-[#3E3028]">Gemini</strong> que se abrió, ubica el cuadro de chat o abre el menú de <strong className="text-[#3E3028]">Gems</strong>.
-                </li>
-                <li>
-                  Escribe o pega la habilidad{' '}
+                  Copia la habilidad{' '}
                   <code className="px-1.5 py-0.5 rounded bg-[#FFF0DE] text-[#3E3028] font-semibold">
                     {GEMINI_SKILL_HANDLE}
                   </code>{' '}
-                  para ingresar y comenzar a interactuar.
+                  (con el botón de abajo).
+                </li>
+                <li>
+                  Haz clic en <strong className="text-[#3E3028]">Ir a Gemini</strong>, pega la habilidad en el chat y envíala para interactuar con la API.
                 </li>
               </ol>
 
-              <div className="mt-3 pt-2.5 border-t border-[#3E3028]/10 flex items-center justify-between gap-2">
+              <div className="mt-3.5 pt-3 border-t border-[#3E3028]/10 flex flex-wrap items-center justify-between gap-2">
                 <button
                   type="button"
                   onClick={copySkillHandle}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-[#FFF0DE] hover:bg-[#F7C99D]/60 text-[#3E3028] border border-[#F7C99D] font-semibold text-xs px-3 py-1.5 transition-colors cursor-pointer"
+                  className="inline-flex items-center gap-1.5 rounded-full bg-[#FFF0DE] hover:bg-[#F7C99D]/60 text-[#3E3028] border border-[#F7C99D] font-semibold text-xs px-3 py-2 transition-colors cursor-pointer"
                 >
                   {copiedSkill ? (
                     <>
                       <Check className="w-3.5 h-3.5 text-[#1E7A50]" />
-                      <span>Copiado al portapapeles</span>
+                      <span>Habilidad copiada</span>
                     </>
                   ) : (
                     <>
@@ -157,13 +160,16 @@ export function Navbar({
                 </button>
 
                 <a
-                  href="https://gemini.google.com/gems"
+                  href="https://gemini.google.com/app"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-xs font-semibold text-[#F57923] hover:text-[#DF6613] transition-colors"
+                  onClick={() => {
+                    copySkillHandle();
+                  }}
+                  className="inline-flex items-center gap-1.5 rounded-full bg-[#F57923] hover:bg-[#DF6613] text-[#FAF7F0] font-semibold text-xs px-4 py-2 transition-colors shadow-sm shadow-[#F57923]/25"
                 >
-                  <span>Abrir Gems</span>
-                  <ExternalLink className="w-3 h-3" />
+                  <span>Ir a Gemini</span>
+                  <ExternalLink className="w-3.5 h-3.5 shrink-0" />
                 </a>
               </div>
             </div>
